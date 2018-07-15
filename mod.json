@@ -1,0 +1,8 @@
+﻿{
+    "Name": "CrystalClear",
+    "Version": "0.1",
+    "Enabled": true,
+
+    "DLL": "CrystalClear.dll",
+    "Debug" : true
+}
