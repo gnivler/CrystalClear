@@ -11,24 +11,21 @@ namespace CrystalClear
     {
         internal bool Debug = false;
         internal bool DisableAllPostProc = false;
-        internal bool Dithering = false;
-        internal bool Grain = false;
-        internal bool Vignette = false;
-        internal bool Bloom = false;
-        internal bool Shadows = false;
-        internal bool AmbientOcclusion = false;
+        internal bool Dithering = true;
+        internal bool Grain = true;
+        internal bool Vignette = true;
+        internal bool Bloom = true;
+        internal bool Shadows = true;
+        internal bool AmbientOcclusion = true;
     }
 
     public class CrystalClear
     {
-        private static string _modDirectory;
         private static ModSettings _settings;
 
         public void Init(string modDirectory, string settingsJson)
         {
             var harmony = HarmonyInstance.Create("ca.gnivler.ModifiersMod");
-            _modDirectory = modDirectory;
-
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             try
             {
@@ -41,7 +38,15 @@ namespace CrystalClear
             }
         }
 
-        // TODO all procs off  (transpiler?)
+        [HarmonyPatch(typeof(PostProcessingModel))]
+        [HarmonyPatch("enabled", PropertyMethod.Getter)]
+        public static class PatchPostProcessing
+        {
+            public static bool Prefx()
+            {
+                return (!_settings.DisableAllPostProc);
+            }
+        }
 
         [HarmonyPatch(typeof(DitheringComponent))]
         [HarmonyPatch("active", PropertyMethod.Getter)]
@@ -49,11 +54,7 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                if (_settings.Dithering)
-                {
-                    FileLog.Log($"Dither");
-                }
-                return false;
+                return (!_settings.Dithering);
             }
         }
 
@@ -63,11 +64,7 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                if (_settings.Grain)
-                {
-                    FileLog.Log($"Grain");
-                }
-                return false;
+                return (!_settings.Grain);
             }
         }
 
@@ -77,11 +74,7 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                if (_settings.Vignette)
-                {
-                    FileLog.Log($"Vignette");
-                }
-                return false;
+                return (!_settings.Vignette);
             }
         }
 
@@ -91,11 +84,7 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                if (_settings.Bloom)
-                {
-                    FileLog.Log($"Bloom");
-                }
-                return false;
+                return (!_settings.Bloom);
             }
         }
 
@@ -105,11 +94,7 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                if (_settings.Shadows)
-                {
-                    FileLog.Log($"Shadows");
-                }
-                return false;
+                return (!_settings.Shadows);
             }
         }
 
@@ -119,11 +104,7 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                if (_settings.AmbientOcclusion)
-                {
-                    FileLog.Log($"AmbientOcclusion");
-                }
-                return false;
+                return (!_settings.AmbientOcclusion);
             }
         }
     }
