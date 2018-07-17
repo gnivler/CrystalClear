@@ -9,13 +9,13 @@ namespace CrystalClear
 {
     class ModSettings
     {
-        internal bool Debug               = false;
-        internal bool DisableAllPostProc  = false;
-        internal bool Dithering           = false;
-        internal bool Grain               = false;
-        internal bool Vignette            = true;
-        internal bool Bloom               = true;
-        internal bool Shadows             = true;
+        internal bool Debug = false;
+        internal bool DisableAllPostProc = false;
+        internal bool Dithering = false;
+        internal bool Grain = false;
+        internal bool Vignette = true;
+        internal bool Bloom = true;
+        internal bool Shadows = true;
     }
 
     public class CrystalClear
@@ -32,7 +32,7 @@ namespace CrystalClear
                 FileLog.Log(_settings.Debug.ToString());
                 FileLog.Log(_settings.DisableAllPostProc.ToString());
                 FileLog.Log(_settings.Dithering.ToString());
-                if (_settings.Debug) 
+                if (_settings.Debug)
                     FileLog.Log("Woo");
 
             }
