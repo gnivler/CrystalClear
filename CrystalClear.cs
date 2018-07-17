@@ -21,18 +21,20 @@ namespace CrystalClear
     public class CrystalClear
     {
         private static ModSettings _settings;
-
-        public void Init(string modDirectory, string settingsJson)
+        private static string _modDirectory;
+        public static void Init(string modDirectory, string settingsJson)
         {
             var harmony = HarmonyInstance.Create("ca.gnivler.ModifiersMod");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             try
             {
+                _modDirectory = modDirectory;
                 _settings = JsonConvert.DeserializeObject<ModSettings>(settingsJson);
                 FileLog.Log(_settings.Debug.ToString());
                 FileLog.Log(_settings.DisableAllPostProc.ToString());
                 FileLog.Log(_settings.Dithering.ToString());
-                FileLog.Log("Woo");
+                if (_settings.Debug)
+                    FileLog.Log("Woo");
 
             }
             catch (Exception e)
@@ -82,7 +84,7 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                FileLog.Log("Ving");
+                FileLog.Log("Dithering");
                 return _settings.Vignette;
             }
         }
