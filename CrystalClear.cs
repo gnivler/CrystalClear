@@ -32,8 +32,7 @@ namespace CrystalClear
                 FileLog.Log(_settings.Debug.ToString());
                 FileLog.Log(_settings.DisableAllPostProc.ToString());
                 FileLog.Log(_settings.Dithering.ToString());
-                if (_settings.Debug)
-                    FileLog.Log("Woo");
+                FileLog.Log("Woo");
 
             }
             catch (Exception e)
@@ -42,17 +41,17 @@ namespace CrystalClear
             }
         }
 
-        /*
+        
         [HarmonyPatch(typeof(PostProcessingModel))]
         [HarmonyPatch("enabled", PropertyMethod.Getter)]
         public static class PatchPostProcessing
         {
-            public static bool Prefx()
+            public static bool Prefix()
             {
                 FileLog.Log("In PostProc\n");
                 return _settings.DisableAllPostProc;
             }
-        }*/
+        }
 
         [HarmonyPatch(typeof(DitheringComponent))]
         [HarmonyPatch("active", PropertyMethod.Getter)]
@@ -83,6 +82,7 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
+                FileLog.Log("Ving");
                 return _settings.Vignette;
             }
         }
