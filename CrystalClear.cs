@@ -14,11 +14,10 @@ namespace CrystalClear
 
         [HarmonyPatch(typeof(DitheringComponent))]
         [HarmonyPatch("active", PropertyMethod.Getter)]
-        public static class PathDitheringComp
+        public static class PatchDitheringComp
         {
             public static bool Prefix()
             {
-                FileLog.Log($"Dither\n");
                 return false;
             }
         }
@@ -29,7 +28,6 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                FileLog.Log("Grain\n");
                 return false;
             }
         }
