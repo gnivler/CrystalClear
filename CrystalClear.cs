@@ -9,14 +9,13 @@ namespace CrystalClear
 {
     class ModSettings
     {
-        internal bool Debug = false;
-        internal bool DisableAllPostProc = false;
-        internal bool Dithering = true;
-        internal bool Grain = true;
-        internal bool Vignette = true;
-        internal bool Bloom = true;
-        internal bool Shadows = true;
-        internal bool AmbientOcclusion = true;
+        internal bool Debug               = false;
+        internal bool DisableAllPostProc  = false;
+        internal bool Dithering           = false;
+        internal bool Grain               = false;
+        internal bool Vignette            = true;
+        internal bool Bloom               = true;
+        internal bool Shadows             = true;
     }
 
     public class CrystalClear
@@ -30,6 +29,11 @@ namespace CrystalClear
             try
             {
                 _settings = JsonConvert.DeserializeObject<ModSettings>(settingsJson);
+                FileLog.Log(_settings.Debug.ToString());
+                FileLog.Log(_settings.DisableAllPostProc.ToString());
+                FileLog.Log(_settings.Dithering.ToString());
+                if (_settings.Debug) 
+                    FileLog.Log("Woo");
 
             }
             catch (Exception e)
@@ -38,15 +42,17 @@ namespace CrystalClear
             }
         }
 
+        /*
         [HarmonyPatch(typeof(PostProcessingModel))]
         [HarmonyPatch("enabled", PropertyMethod.Getter)]
         public static class PatchPostProcessing
         {
             public static bool Prefx()
             {
-                return (!_settings.DisableAllPostProc);
+                FileLog.Log("In PostProc\n");
+                return _settings.DisableAllPostProc;
             }
-        }
+        }*/
 
         [HarmonyPatch(typeof(DitheringComponent))]
         [HarmonyPatch("active", PropertyMethod.Getter)]
@@ -54,7 +60,9 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                return (!_settings.Dithering);
+                FileLog.Log("Dithering");
+                return _settings.Dithering;
+
             }
         }
 
@@ -64,7 +72,8 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                return (!_settings.Grain);
+                FileLog.Log("Grain");
+                return _settings.Grain;
             }
         }
 
@@ -74,7 +83,7 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                return (!_settings.Vignette);
+                return _settings.Vignette;
             }
         }
 
@@ -84,7 +93,7 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                return (!_settings.Bloom);
+                return _settings.Bloom;
             }
         }
 
@@ -94,17 +103,7 @@ namespace CrystalClear
         {
             public static bool Prefix()
             {
-                return (!_settings.Shadows);
-            }
-        }
-
-        [HarmonyPatch(typeof(AmbientOcclusionComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
-        public static class PatchAmbientOcclusion
-        {
-            public static bool Prefix()
-            {
-                return (!_settings.AmbientOcclusion);
+                return _settings.Shadows;
             }
         }
     }
