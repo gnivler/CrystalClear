@@ -3,80 +3,53 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
+using System.Text;
+using TMPro;
 using UnityEngine.PostProcessing;
+
 
 namespace CrystalClear
 {
-    class ModSettings
+    internal class ModSettings
     {
-        internal bool Debug = true;
-        internal bool EnablePostProc = true;
-        internal bool Dithering = true;
-        internal bool Grain = true;
-        internal bool Vignette = true;
-        internal bool Bloom = true;
-        internal bool Shadows = true;
+        public bool Debug;
+        public bool Dithering;
+        public bool Grain;
+        public bool Vignette;
+        public bool Bloom;
+        public bool Shadows;
+        public bool ChromaticAberration;
+        public bool EyeAdaptation;
+        public bool Fog;
+        public bool ColorGrading;   
     }
 
-    public class CrystalClear
+    public static class CrystalClear
     {
-        private static ModSettings _settings;
-        private static string _modDirectory;
+        internal static ModSettings _settings;
+        internal static string _modDirectory;
         public static void Init(string modDirectory, string settingsJson)
         {
-            FileLog.Log("Init");
+            //FileLog.Reset();
+            //FileLog.Log($"{DateTime.Now.ToLongTimeString()} Init");
             var harmony = HarmonyInstance.Create("ca.gnivler.CrystalClear");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             try
             {
                 _modDirectory = modDirectory;
                 _settings = JsonConvert.DeserializeObject<ModSettings>(settingsJson);
+
             }
             catch (Exception e)
             {
-                FileLog.Log(e.ToString());
-            }
-        }
-
-        [HarmonyPatch(typeof(PostProcessingModel))]
-        [HarmonyPatch("enabled", PropertyMethod.Getter)]
-        public static class PatchPostProcessing
-        {
-            public static bool Prefix()
-            {
-                FileLog.Log("PostProcessingModel Prefix");
-                return true;
+                //FileLog.Log("Exception");
+                //FileLog.Log(e.ToString());
             }
 
-            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            if (_settings.Debug)
             {
-                FileLog.Log("PostProcessingModel Transpiler");
-                // var codes = new List<CodeInstruction>(instructions);
-                // var sb = new StringBuilder();
-                //
-                // foreach (CodeInstruction code in codes)
-                // {
-                //     FileLog.Log($"{code.opcode} {code.operand}".ToString());
-                // }
-                //
-                // //codes.Where(x => x.opcode == OpCodes.Ldfld).Select(x => x.opcode = OpCodes.Ldc_I4_0);
-                // for (var i = 0; i < codes.Count; i++)
-                // {
-                //     FileLog.Log(codes[i] + "\n");
-                //     if (codes[i].opcode == OpCodes.Ldfld)
-                //     {
-                //         codes[i].opcode = OpCodes.Ldc_I4_0;
-                //         codes[i].operand = null;
-                //     }               
-                // }
-                //
-                // foreach (CodeInstruction code in codes)
-                // {
-                //     FileLog.Log($"{code.opcode} {code.operand}".ToString());
-                // }
-                //
-                // //FileLog.Log(codes.Select(x => x.operand).ToString());
-                return instructions;
+                //FileLog.Log("Debug enabled");
             }
         }
 
@@ -86,11 +59,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                bool flag = false;
-                if (!flag)
-                    FileLog.Log("Dithering");
-                flag = true;
-                __result = false;
+                __result = _settings.Dithering;
                 return false;
             }
         }
@@ -101,11 +70,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                bool flag = false;
-                if (!flag)
-                    FileLog.Log("Grain");
-                flag = true;
-                __result = false;
+                __result = _settings.Grain;
                 return false;
             }
         }
@@ -116,11 +81,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                bool flag = false;
-                if (!flag)
-                    FileLog.Log("Vignette");
-                flag = true;
-                __result = false;
+                __result = _settings.Vignette;
                 return false;
             }
         }
@@ -131,11 +92,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                bool flag = false;
-                if (!flag)
-                    FileLog.Log("Bloom");
-                flag = true;
-                __result = false;
+                __result = _settings.Bloom;
                 return false;
             }
         }
@@ -146,13 +103,54 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                bool flag = false;
-                if (!flag)
-                    FileLog.Log("Shadows");
-                flag = true;
-                __result = false;
+                __result = _settings.Shadows;
                 return false;
             }
         }
+
+        [HarmonyPatch(typeof(ChromaticAberrationComponent))]
+        [HarmonyPatch("active", PropertyMethod.Getter)]
+        public static class ChromaticAberration
+        {
+            public static bool Prefix(ref bool __result)
+            {
+                __result = _settings.ChromaticAberration;
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(EyeAdaptationComponent))]
+        [HarmonyPatch("active", PropertyMethod.Getter)]
+        public static class EyeAdaptation
+        {
+            public static bool Prefix(ref bool __result)
+            {
+                __result = _settings.EyeAdaptation;
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(FogComponent))]
+        [HarmonyPatch("active", PropertyMethod.Getter)]
+        public static class Fog
+        {
+            public static bool Prefix(ref bool __result)
+            {
+                __result = _settings.Fog;
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(ColorGradingComponent))]
+        [HarmonyPatch("active", PropertyMethod.Getter)]
+        public static class ColorGrading
+        {
+            public static bool Prefix(ref bool __result)
+            {
+                __result = _settings.ColorGrading;
+                return false;
+            }
+        }
+
     }
 }
