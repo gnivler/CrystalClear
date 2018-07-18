@@ -1,18 +1,18 @@
-﻿using System;
-using Harmony;
-using System.Reflection;
+﻿using Harmony;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine.PostProcessing;
-using static CrystalClear.CrystalClear;
 
 namespace CrystalClear
 {
     class ModSettings
     {
-        internal bool Debug = false;
-        internal bool DisableAllPostProc = false;
-        internal bool Dithering = false;
-        internal bool Grain = false;
+        internal bool Debug = true;
+        internal bool EnablePostProc = true;
+        internal bool Dithering = true;
+        internal bool Grain = true;
         internal bool Vignette = true;
         internal bool Bloom = true;
         internal bool Shadows = true;
@@ -24,18 +24,13 @@ namespace CrystalClear
         private static string _modDirectory;
         public static void Init(string modDirectory, string settingsJson)
         {
-            var harmony = HarmonyInstance.Create("ca.gnivler.ModifiersMod");
+            FileLog.Log("Init");
+            var harmony = HarmonyInstance.Create("ca.gnivler.CrystalClear");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             try
             {
                 _modDirectory = modDirectory;
                 _settings = JsonConvert.DeserializeObject<ModSettings>(settingsJson);
-                FileLog.Log(_settings.Debug.ToString());
-                FileLog.Log(_settings.DisableAllPostProc.ToString());
-                FileLog.Log(_settings.Dithering.ToString());
-                if (_settings.Debug)
-                    FileLog.Log("Woo");
-
             }
             catch (Exception e)
             {
@@ -43,15 +38,45 @@ namespace CrystalClear
             }
         }
 
-        
         [HarmonyPatch(typeof(PostProcessingModel))]
         [HarmonyPatch("enabled", PropertyMethod.Getter)]
         public static class PatchPostProcessing
         {
             public static bool Prefix()
             {
-                FileLog.Log("In PostProc\n");
-                return _settings.DisableAllPostProc;
+                FileLog.Log("PostProcessingModel Prefix");
+                return true;
+            }
+
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                FileLog.Log("PostProcessingModel Transpiler");
+                // var codes = new List<CodeInstruction>(instructions);
+                // var sb = new StringBuilder();
+                //
+                // foreach (CodeInstruction code in codes)
+                // {
+                //     FileLog.Log($"{code.opcode} {code.operand}".ToString());
+                // }
+                //
+                // //codes.Where(x => x.opcode == OpCodes.Ldfld).Select(x => x.opcode = OpCodes.Ldc_I4_0);
+                // for (var i = 0; i < codes.Count; i++)
+                // {
+                //     FileLog.Log(codes[i] + "\n");
+                //     if (codes[i].opcode == OpCodes.Ldfld)
+                //     {
+                //         codes[i].opcode = OpCodes.Ldc_I4_0;
+                //         codes[i].operand = null;
+                //     }               
+                // }
+                //
+                // foreach (CodeInstruction code in codes)
+                // {
+                //     FileLog.Log($"{code.opcode} {code.operand}".ToString());
+                // }
+                //
+                // //FileLog.Log(codes.Select(x => x.operand).ToString());
+                return instructions;
             }
         }
 
@@ -59,11 +84,14 @@ namespace CrystalClear
         [HarmonyPatch("active", PropertyMethod.Getter)]
         public static class PacthDitheringComp
         {
-            public static bool Prefix()
+            public static bool Prefix(ref bool __result)
             {
-                FileLog.Log("Dithering");
-                return _settings.Dithering;
-
+                bool flag = false;
+                if (!flag)
+                    FileLog.Log("Dithering");
+                flag = true;
+                __result = false;
+                return false;
             }
         }
 
@@ -71,10 +99,14 @@ namespace CrystalClear
         [HarmonyPatch("active", PropertyMethod.Getter)]
         public static class PatchGrainComp
         {
-            public static bool Prefix()
+            public static bool Prefix(ref bool __result)
             {
-                FileLog.Log("Grain");
-                return _settings.Grain;
+                bool flag = false;
+                if (!flag)
+                    FileLog.Log("Grain");
+                flag = true;
+                __result = false;
+                return false;
             }
         }
 
@@ -82,10 +114,14 @@ namespace CrystalClear
         [HarmonyPatch("active", PropertyMethod.Getter)]
         public static class PatchVignette
         {
-            public static bool Prefix()
+            public static bool Prefix(ref bool __result)
             {
-                FileLog.Log("Dithering");
-                return _settings.Vignette;
+                bool flag = false;
+                if (!flag)
+                    FileLog.Log("Vignette");
+                flag = true;
+                __result = false;
+                return false;
             }
         }
 
@@ -93,9 +129,14 @@ namespace CrystalClear
         [HarmonyPatch("active", PropertyMethod.Getter)]
         public static class PatchBloom
         {
-            public static bool Prefix()
+            public static bool Prefix(ref bool __result)
             {
-                return _settings.Bloom;
+                bool flag = false;
+                if (!flag)
+                    FileLog.Log("Bloom");
+                flag = true;
+                __result = false;
+                return false;
             }
         }
 
@@ -103,9 +144,14 @@ namespace CrystalClear
         [HarmonyPatch("active", PropertyMethod.Getter)]
         public static class PatchShadows
         {
-            public static bool Prefix()
+            public static bool Prefix(ref bool __result)
             {
-                return _settings.Shadows;
+                bool flag = false;
+                if (!flag)
+                    FileLog.Log("Shadows");
+                flag = true;
+                __result = false;
+                return false;
             }
         }
     }
