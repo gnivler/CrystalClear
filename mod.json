@@ -1,8 +1,19 @@
 ﻿{
     "Name": "CrystalClear",
-    "Version": "0.1",
+    "Version": "1.1",
     "Enabled": true,
 
     "DLL": "CrystalClear.dll",
-    "Debug" : true
+
+    "Settings": {
+        "Debug": false,
+        "Grain": false,
+        "Dithering": false,
+        "Bloom": true,
+        "Shadows": true,
+        "ChromaticAberration": true,
+        "EyeAdaptation": true,
+        "Fog": true,
+        "ColorGrading": true,
+    }
 }
