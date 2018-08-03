@@ -18,8 +18,8 @@
         "AmbientOcclusion": true,
         "Taa": true,
         "DepthOfField": true,
-        "UserLut": true,
+        "UserLut": false,
         "Fxaa": true,
-        "HDR": true
+        "HDR": false
     }
 }
