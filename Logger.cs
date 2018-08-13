@@ -17,7 +17,6 @@ namespace CrystalClear
 
         public static void Debug(string line)
         {
-            if (!CrystalClear.Settings.Debug) return;
             using (var writer = new StreamWriter(LogFilePath, true))
             {
                 writer.WriteLine(line);
