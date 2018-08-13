@@ -1,12 +1,7 @@
 ﻿using Harmony;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
-using BattleTech;
-using BattleTech.Rendering;
-using UnityEngine;
 using UnityEngine.PostProcessing;
 using static CrystalClear.Logger;
 
