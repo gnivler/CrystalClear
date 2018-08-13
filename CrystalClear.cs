@@ -21,12 +21,11 @@ namespace CrystalClear
         public bool Shadows;
         public bool ChromaticAberration;
         public bool EyeAdaptation;
-        public bool Fog; // true is problematic
+        public bool Fog;
         public bool ColorGrading;
         public bool AmbientOcclusion;
         public bool Taa;
         public bool DepthOfField;
-        public bool UserLut; // true is problematic
         public bool Fxaa;
         public bool HDR;
     }
@@ -49,8 +48,6 @@ namespace CrystalClear
             {
                 Error(e);
             }
-
-            Clear();
         }
 
         [HarmonyPatch(typeof(DitheringComponent))]

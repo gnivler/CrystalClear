@@ -17,7 +17,6 @@
         "AmbientOcclusion": true,       /* looks so good I wouldn't disable it */
         "Taa": true,                    /* temporal antialiasing aka MFAA - good fidelity */
         "DepthOfField": true,           /* stuff at different distances is focused differently (blurred) */
-        "UserLut": false,               /* unsure */
         "Fxaa": true,                   /* almost-free light anti-aliasing */
         "HDR": true                     /* renderer is expecting this to be on but works without */
     }
