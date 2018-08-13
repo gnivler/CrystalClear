@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using BattleTech;
 using BattleTech.Rendering;
 using UnityEngine;
@@ -13,20 +14,19 @@ namespace CrystalClear
 {
     public class ModSettings
     {
-        public bool Debug;
         public bool Dithering;
         public bool Grain;
         public bool Vignette;
         public bool Bloom;
         public bool Shadows;
         public bool ChromaticAberration;
-        public bool EyeAdaptation;          
-        public bool Fog;                    // true is problematic
+        public bool EyeAdaptation;
+        public bool Fog; // true is problematic
         public bool ColorGrading;
         public bool AmbientOcclusion;
         public bool Taa;
         public bool DepthOfField;
-        public bool UserLut;                // true is problematic
+        public bool UserLut; // true is problematic
         public bool Fxaa;
         public bool HDR;
     }
@@ -181,17 +181,6 @@ namespace CrystalClear
             public static bool Prefix(ref bool __result)
             {
                 __result = Settings.DepthOfField;
-                return false;
-            }
-        }
-
-        [HarmonyPatch(typeof(UserLutComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
-        public static class UserLut
-        {
-            public static bool Prefix(ref bool __result)
-            {
-                __result = Settings.UserLut;
                 return false;
             }
         }
