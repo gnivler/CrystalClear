@@ -14,19 +14,6 @@ using UnityEngine;
 using UnityEngine.PostProcessing;
 using static CrystalClear.Logger;
 
-// this could be for CC
-//    if ((UnityEngine.Object) this.grungeTex != (UnityEngine.Object) null && this.useUIPostProcessing && BTCustomRenderer.UIMSAA > 2)
-//    {
-//        this.postProcessMaterial.SetTexture(BTPostProcess.Uniforms._GrungeTex, (Texture) this.grungeTex);
-//        this.postProcessMaterial.EnableKeyword("GRUNGE");
-//    }
-//    else
-//    this.postProcessMaterial.DisableKeyword("GRUNGE");
-//if ((UnityEngine.Object) this.scanlineTex != (UnityEngine.Object) null && this.useUIPostProcessing && BTCustomRenderer.UIMSAA > 2)
-//{
-//this.postProcessMaterial.SetTexture(BTPostProcess.Uniforms._ScanlineTex, (Texture) this.scanlineTex);
-//this.postProcessMaterial.EnableKeyword("SCANLINE");
-
 namespace CrystalClear
 {
     public class ModSettings

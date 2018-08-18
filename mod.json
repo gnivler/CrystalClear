@@ -20,8 +20,8 @@
         "DepthOfField": true,           /* stuff at different distances is focused differently (blurred) */
         "Fxaa": true,                   /* almost-free light anti-aliasing */
         "HDR": true,                    /* renderer is expecting this to be on but works without */
-        "Grunge": true,
-        "Scanlines": true,
+        "Grunge": true,                 /* dirty UI */
+        "Scanlines": true,              /* scanline animation on UI */
 
     }
 }
