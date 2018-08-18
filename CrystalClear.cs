@@ -225,34 +225,5 @@ namespace CrystalClear
                 return false;
             }
         }
-
-        //   System.FormatException: Method BattleTech.Rendering.FogScattering
-        //   .GetHaltonValue(System.Int32, System.Int32) cannot be patched.
-        //   Reason: Invalid IL code in (wrapper dynamic-method) BattleTech.Rendering.FogScattering
-        //   :GetHaltonValue_Patch1 (object,int,int): IL_0013: stloc.2   
-        //[HarmonyPatch(typeof(FogScattering), "GetHaltonValue")]
-        //public static class HaltonPatch
-        //{
-        //    public static bool Prefix(ref float __result)
-        //    {
-        //        Debug("Jabber");
-        //        __result = 0;
-        //        return false;
-        //    }
-        //
-        //    public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-        //    {
-        //        var codes = new List<CodeInstruction>(instructions);
-        //        var newCodes = new List<CodeInstruction>();
-        //
-        //        newCodes.Add(new CodeInstruction(OpCodes.Nop));
-        //        //codes.Add(new CodeInstruction(OpCodes.Ldc_I4_0));
-        //        //codes.Add(new CodeInstruction(OpCodes.Ret));
-        //   
-        //
-        //        
-        //        return newCodes;
-        //    }
-        //}
     }
 }
