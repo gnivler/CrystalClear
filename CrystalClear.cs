@@ -1,9 +1,31 @@
 ﻿using Harmony;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
+using System.Text;
+using BattleTech;
+using BattleTech.Rendering;
+using Org.BouncyCastle.Math.Raw;
+using UnityEngine;
 using UnityEngine.PostProcessing;
 using static CrystalClear.Logger;
+
+// this could be for CC
+//    if ((UnityEngine.Object) this.grungeTex != (UnityEngine.Object) null && this.useUIPostProcessing && BTCustomRenderer.UIMSAA > 2)
+//    {
+//        this.postProcessMaterial.SetTexture(BTPostProcess.Uniforms._GrungeTex, (Texture) this.grungeTex);
+//        this.postProcessMaterial.EnableKeyword("GRUNGE");
+//    }
+//    else
+//    this.postProcessMaterial.DisableKeyword("GRUNGE");
+//if ((UnityEngine.Object) this.scanlineTex != (UnityEngine.Object) null && this.useUIPostProcessing && BTCustomRenderer.UIMSAA > 2)
+//{
+//this.postProcessMaterial.SetTexture(BTPostProcess.Uniforms._ScanlineTex, (Texture) this.scanlineTex);
+//this.postProcessMaterial.EnableKeyword("SCANLINE");
 
 namespace CrystalClear
 {
@@ -23,25 +45,43 @@ namespace CrystalClear
         public bool DepthOfField;
         public bool Fxaa;
         public bool HDR;
+        public bool Grunge;
+        public bool Scanlines;
     }
 
     public static class CrystalClear
     {
-        internal static ModSettings Settings;
-        internal static string ModDirectory;
+        private static ModSettings settings;
+        public static string modDirectory;
 
         public static void Init(string modDirectory, string settingsJson)
         {
-            var harmony = HarmonyInstance.Create("com.gnivler.CrystalClear");
+            FileLog.logPath = Path.Combine(modDirectory, "log.txt");
+            Clear();
+            var harmony = HarmonyInstance.Create("ca.gnivler.ScorchedEarth");
+            //HarmonyInstance.DEBUG = false;
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             try
             {
-                ModDirectory = modDirectory;
-                Settings = JsonConvert.DeserializeObject<ModSettings>(settingsJson);
+                CrystalClear.modDirectory = modDirectory;
+                settings = JsonConvert.DeserializeObject<ModSettings>(settingsJson);
             }
             catch (Exception e)
             {
                 Error(e);
+            }
+
+            if (settings.Grunge || settings.Scanlines) return;
+            int mainTex = Shader.PropertyToID("_MainTex");
+            Type uniformsType = AccessTools.Inner(typeof(BTPostProcess), "Uniforms");
+            if (!settings.Grunge)
+            {
+                AccessTools.Field(uniformsType, "_GrungeTex").SetValue(null, mainTex);
+            }
+
+            if (!settings.Scanlines)
+            {
+                AccessTools.Field(uniformsType, "_ScanlineTex").SetValue(null, mainTex);
             }
         }
 
@@ -51,7 +91,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.Dithering;
+                __result = settings.Dithering;
                 return false;
             }
         }
@@ -62,7 +102,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.Grain;
+                __result = settings.Grain;
                 return false;
             }
         }
@@ -73,7 +113,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.Vignette;
+                __result = settings.Vignette;
                 return false;
             }
         }
@@ -84,7 +124,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.Bloom;
+                __result = settings.Bloom;
                 return false;
             }
         }
@@ -95,7 +135,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.Shadows;
+                __result = settings.Shadows;
                 return false;
             }
         }
@@ -106,7 +146,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.ChromaticAberration;
+                __result = settings.ChromaticAberration;
                 return false;
             }
         }
@@ -117,7 +157,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.EyeAdaptation;
+                __result = settings.EyeAdaptation;
                 return false;
             }
         }
@@ -128,7 +168,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.Fog;
+                __result = settings.Fog;
                 return false;
             }
         }
@@ -139,7 +179,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.ColorGrading;
+                __result = settings.ColorGrading;
                 return false;
             }
         }
@@ -150,7 +190,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.AmbientOcclusion;
+                __result = settings.AmbientOcclusion;
                 return false;
             }
         }
@@ -161,7 +201,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.Taa;
+                __result = settings.Taa;
                 return false;
             }
         }
@@ -172,7 +212,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.DepthOfField;
+                __result = settings.DepthOfField;
                 return false;
             }
         }
@@ -183,7 +223,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.Fxaa;
+                __result = settings.Fxaa;
                 return false;
             }
         }
@@ -194,9 +234,38 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = Settings.HDR;
+                __result = settings.HDR;
                 return false;
             }
         }
+
+        //   System.FormatException: Method BattleTech.Rendering.FogScattering
+        //   .GetHaltonValue(System.Int32, System.Int32) cannot be patched.
+        //   Reason: Invalid IL code in (wrapper dynamic-method) BattleTech.Rendering.FogScattering
+        //   :GetHaltonValue_Patch1 (object,int,int): IL_0013: stloc.2   
+        //[HarmonyPatch(typeof(FogScattering), "GetHaltonValue")]
+        //public static class HaltonPatch
+        //{
+        //    public static bool Prefix(ref float __result)
+        //    {
+        //        Debug("Jabber");
+        //        __result = 0;
+        //        return false;
+        //    }
+        //
+        //    public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        //    {
+        //        var codes = new List<CodeInstruction>(instructions);
+        //        var newCodes = new List<CodeInstruction>();
+        //
+        //        newCodes.Add(new CodeInstruction(OpCodes.Nop));
+        //        //codes.Add(new CodeInstruction(OpCodes.Ldc_I4_0));
+        //        //codes.Add(new CodeInstruction(OpCodes.Ret));
+        //   
+        //
+        //        
+        //        return newCodes;
+        //    }
+        //}
     }
 }

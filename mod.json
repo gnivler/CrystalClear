@@ -8,6 +8,7 @@
     "Settings": {
         "Grain": false,                 /* reduces clarity when enabled */
         "Dithering": false,             /* reduces clarity when enabled */
+        "Vignette": true,               /* darkens the edges of the scene */
         "Bloom": true,                  /* makes light sources overblown when enabled */
         "Shadows": true,                /* can fully disable */
         "ChromaticAberration": true,    /* unsure if used.  it should appear as green/purple edge tinting */
@@ -18,6 +19,11 @@
         "Taa": true,                    /* temporal antialiasing aka MFAA - good fidelity */
         "DepthOfField": true,           /* stuff at different distances is focused differently (blurred) */
         "Fxaa": true,                   /* almost-free light anti-aliasing */
-        "HDR": true                     /* renderer is expecting this to be on but works without */
+        "HDR": true,                    /* renderer is expecting this to be on but works without */
+        "Grunge": true,
+        "Scanlines": true,
+
     }
 }
+
+
