@@ -5,7 +5,7 @@ namespace CrystalClear
 {
     public static class Logger
     {
-        private static string LogFilePath => $"{CrystalClear.ModDirectory}/log.txt";
+        private static string LogFilePath => $"{CrystalClear.modDirectory}/log.txt";
         public static void Error(Exception ex)
         {
             using (var writer = new StreamWriter(LogFilePath, true))
