@@ -19,3 +19,5 @@ Taa</br>
 DepthOfField</br>
 Fxaa</br>
 HDR</br>
+Grunge</br>
+Scanlines</br>
