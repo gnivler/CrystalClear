@@ -15,8 +15,9 @@ namespace CrystalClear
             }
         }
 
-        public static void Debug(string line)
+        public static void LogDebug(string line)
         {
+            if (!CrystalClear.modSettings.enableDebug) return;
             using (var writer = new StreamWriter(LogFilePath, true))
             {
                 writer.WriteLine(line);

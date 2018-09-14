@@ -1,27 +1,22 @@
 ﻿using Harmony;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using BattleTech;
 using BattleTech.Rendering;
-using Org.BouncyCastle.Math.Raw;
 using UnityEngine;
 using UnityEngine.PostProcessing;
 using static CrystalClear.Logger;
 
 namespace CrystalClear
 {
-    public class ModSettings
+    public class Settings
     {
         public bool Dithering;
         public bool Grain;
         public bool Vignette;
         public bool Bloom;
+        public bool UIBloom;
         public bool Shadows;
         public bool ChromaticAberration;
         public bool EyeAdaptation;
@@ -34,194 +29,212 @@ namespace CrystalClear
         public bool HDR;
         public bool Grunge;
         public bool Scanlines;
+        public bool enableDebug;
     }
 
     public static class CrystalClear
     {
-        private static ModSettings settings;
+        public static Settings modSettings;
         public static string modDirectory;
 
         public static void Init(string modDirectory, string settingsJson)
         {
             FileLog.logPath = Path.Combine(modDirectory, "log.txt");
             Clear();
-            var harmony = HarmonyInstance.Create("ca.gnivler.ScorchedEarth");
+            var harmony = HarmonyInstance.Create("ca.gnivler.CrystalClear");
             //HarmonyInstance.DEBUG = false;
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             try
             {
                 CrystalClear.modDirectory = modDirectory;
-                settings = JsonConvert.DeserializeObject<ModSettings>(settingsJson);
+                modSettings = JsonConvert.DeserializeObject<Settings>(settingsJson);
             }
             catch (Exception e)
             {
                 Error(e);
             }
 
-            if (settings.Grunge || settings.Scanlines) return;
+            if (modSettings.Grunge || modSettings.Scanlines) return;
             int mainTex = Shader.PropertyToID("_MainTex");
             Type uniformsType = AccessTools.Inner(typeof(BTPostProcess), "Uniforms");
-            if (!settings.Grunge)
+            if (!modSettings.Grunge)
             {
                 AccessTools.Field(uniformsType, "_GrungeTex").SetValue(null, mainTex);
             }
 
-            if (!settings.Scanlines)
+            if (!modSettings.Scanlines)
             {
                 AccessTools.Field(uniformsType, "_ScanlineTex").SetValue(null, mainTex);
             }
+
+            if (!modSettings.Dithering)
+            {
+                AccessTools.Field(uniformsType, "_DitheringTex").SetValue(null, 0);
+            }
         }
 
-        [HarmonyPatch(typeof(DitheringComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(BTPostProcess), "OnEnable", MethodType.Normal)]
+        public static class BTPostProcess_Ctor_Patch
+        {
+            public static void Postfix(ref float ___uiBloomIntensity)
+            {
+                if (!modSettings.UIBloom)
+                {
+                    ___uiBloomIntensity = 0f;
+                    LogDebug("Patching UI bloom");
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(MenuCamera), "OnEnable", MethodType.Normal)]
+        public static class MenuCamera_Ctor_Patch
+        {
+            public static void Postfix(ref float ___uiBloomIntensity)
+            {
+                if (!modSettings.UIBloom)
+                {
+                    LogDebug("Patching menu bloom");
+                    ___uiBloomIntensity = 0f;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(DitheringComponent), "active", MethodType.Getter)]
         public static class PatchDitheringComp
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.Dithering;
+                __result = modSettings.Dithering;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(GrainComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(GrainComponent), "active", MethodType.Getter)]
         public static class PatchGrainComp
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.Grain;
+                __result = modSettings.Grain;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(VignetteComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(VignetteComponent), "active", MethodType.Getter)]
         public static class PatchVignette
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.Vignette;
+                __result = modSettings.Vignette;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(BloomComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(BloomComponent), "active", MethodType.Getter)]
         public static class PatchBloom
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.Bloom;
+                __result = modSettings.Bloom;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(ScreenSpaceShadowsComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(ScreenSpaceShadowsComponent), "active", MethodType.Getter)]
         public static class PatchShadows
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.Shadows;
+                __result = modSettings.Shadows;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(ChromaticAberrationComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(ChromaticAberrationComponent), "active", MethodType.Getter)]
         public static class ChromaticAberration
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.ChromaticAberration;
+                __result = modSettings.ChromaticAberration;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(EyeAdaptationComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(EyeAdaptationComponent), "active", MethodType.Getter)]
         public static class EyeAdaptation
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.EyeAdaptation;
+                __result = modSettings.EyeAdaptation;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(FogComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(FogComponent), "active", MethodType.Getter)]
         public static class Fog
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.Fog;
+                __result = modSettings.Fog;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(ColorGradingComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(ColorGradingComponent), "active", MethodType.Getter)]
         public static class ColorGrading
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.ColorGrading;
+                __result = modSettings.ColorGrading;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(AmbientOcclusionComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(AmbientOcclusionComponent), "active", MethodType.Getter)]
         public static class AmbientOcclusion
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.AmbientOcclusion;
+                __result = modSettings.AmbientOcclusion;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(TaaComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(TaaComponent), "active", MethodType.Getter)]
         public static class Taa
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.Taa;
+                __result = modSettings.Taa;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(DepthOfFieldComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(DepthOfFieldComponent), "active", MethodType.Getter)]
         public static class DepthOfField
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.DepthOfField;
+                __result = modSettings.DepthOfField;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(FxaaComponent))]
-        [HarmonyPatch("active", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(FxaaComponent), "active", MethodType.Getter)]
         public static class Fxaa
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.Fxaa;
+                __result = modSettings.Fxaa;
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(PostProcessingContext))]
-        [HarmonyPatch("isHdr", PropertyMethod.Getter)]
+        [HarmonyPatch(typeof(PostProcessingContext), "isHdr", MethodType.Getter)]
         public static class HdrPatch
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = settings.HDR;
+                __result = modSettings.HDR;
                 return false;
             }
         }
