@@ -12,30 +12,32 @@ namespace CrystalClear
 {
     public class Settings
     {
-        public bool Dithering;
-        public bool Grain;
-        public bool Vignette;
-        public bool Bloom;
-        public bool UIBloom;
-        public bool Shadows;
-        public bool ChromaticAberration;
-        public bool EyeAdaptation;
-        public bool Fog;
-        public bool ColorGrading;
-        public bool AmbientOcclusion;
-        public bool Taa;
-        public bool DepthOfField;
-        public bool Fxaa;
-        public bool HDR;
-        public bool Grunge;
-        public bool Scanlines;
-        public bool enableDebug;
+        public string Dithering;
+        public string Grain;
+        public string Vignette;
+        public string Bloom;
+        public string UIBloom;
+        public string Shadows;
+        public string ChromaticAberration;
+        public string EyeAdaptation;
+        public string Fog;
+        public string ColorGrading;
+        public string AmbientOcclusion;
+        public string Taa;
+        public string DepthOfField;
+        public string Fxaa;
+        public string HDR;
+        public string Grunge;
+        public string Scanlines;
     }
 
     public static class CrystalClear
     {
         public static Settings modSettings;
         public static string modDirectory;
+        public const string ON = "On";
+        public const string OFF = "Off";
+        public const string IGNORE = "Ignore";
 
         public static void Init(string modDirectory, string settingsJson)
         {
@@ -54,20 +56,22 @@ namespace CrystalClear
                 Error(e);
             }
 
-            if (modSettings.Grunge || modSettings.Scanlines) return;
+            if (modSettings.Grunge == ON || modSettings.Scanlines == ON) return;
+            if (modSettings.Grunge == IGNORE || modSettings.Scanlines == IGNORE) return;
+
             int mainTex = Shader.PropertyToID("_MainTex");
             Type uniformsType = AccessTools.Inner(typeof(BTPostProcess), "Uniforms");
-            if (!modSettings.Grunge)
+            if (modSettings.Grunge == OFF)
             {
                 AccessTools.Field(uniformsType, "_GrungeTex").SetValue(null, mainTex);
             }
 
-            if (!modSettings.Scanlines)
+            if (modSettings.Scanlines == OFF)
             {
                 AccessTools.Field(uniformsType, "_ScanlineTex").SetValue(null, mainTex);
             }
 
-            if (!modSettings.Dithering)
+            if (modSettings.Dithering == OFF)
             {
                 AccessTools.Field(uniformsType, "_DitheringTex").SetValue(null, 0);
             }
@@ -76,26 +80,27 @@ namespace CrystalClear
         [HarmonyPatch(typeof(BTPostProcess), "OnEnable", MethodType.Normal)]
         public static class BTPostProcess_Ctor_Patch
         {
-            public static void Postfix(ref float ___uiBloomIntensity)
+            public static bool Postfix(ref float ___uiBloomIntensity)
             {
-                if (!modSettings.UIBloom)
-                {
-                    ___uiBloomIntensity = 0f;
-                    LogDebug("Patching UI bloom");
-                }
+                if (modSettings.UIBloom == IGNORE) return true;
+                if (modSettings.UIBloom == ON) return true;
+                ___uiBloomIntensity = 0f;
+                LogDebug("Patching UI bloom");
+                return false;
             }
         }
 
         [HarmonyPatch(typeof(MenuCamera), "OnEnable", MethodType.Normal)]
         public static class MenuCamera_Ctor_Patch
         {
-            public static void Postfix(ref float ___uiBloomIntensity)
+            public static bool Postfix(ref float ___uiBloomIntensity)
             {
-                if (!modSettings.UIBloom)
-                {
-                    LogDebug("Patching menu bloom");
-                    ___uiBloomIntensity = 0f;
-                }
+                if (modSettings.UIBloom == IGNORE) return true;
+                if (modSettings.UIBloom == ON) return true;
+                LogDebug("Patching menu bloom");
+                uiBloomIntensity = 0f;
+                return false;
+
             }
         }
 
@@ -104,7 +109,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.Dithering;
+                if (modSettings.Dithering == IGNORE) return true;
+                __result = modSettings.Dithering == ON;
                 return false;
             }
         }
@@ -114,7 +120,9 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.Grain;
+                if (modSettings.Grain == IGNORE) return true;
+                if (modSettings.Grain == ON) return true;
+                __result = false;
                 return false;
             }
         }
@@ -124,7 +132,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.Vignette;
+                if (modSettings.Vignette == IGNORE) return true;
+                __result = modSettings.Vignette == ON;
                 return false;
             }
         }
@@ -134,7 +143,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.Bloom;
+                if (modSettings.Bloom == IGNORE) return true;
+                __result = modSettings.Bloom == ON;
                 return false;
             }
         }
@@ -144,7 +154,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.Shadows;
+                if (modSettings.Shadows == IGNORE) return true;
+                __result = modSettings.Shadows == ON;
                 return false;
             }
         }
@@ -154,7 +165,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.ChromaticAberration;
+                if (modSettings.ChromaticAberration == IGNORE) return true;
+                __result = modSettings.ChromaticAberration == ON;
                 return false;
             }
         }
@@ -164,7 +176,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.EyeAdaptation;
+                if (modSettings.EyeAdaptation == IGNORE) return true;
+                __result = modSettings.EyeAdaptation == ON;
                 return false;
             }
         }
@@ -174,7 +187,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.Fog;
+                if (modSettings.Fog == IGNORE) return true;
+                __result = modSettings.Fog == ON;
                 return false;
             }
         }
@@ -184,7 +198,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.ColorGrading;
+                if (modSettings.ColorGrading == IGNORE) return true;
+                __result = modSettings.ColorGrading == ON;
                 return false;
             }
         }
@@ -194,7 +209,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.AmbientOcclusion;
+                if (modSettings.AmbientOcclusion == IGNORE) return true;
+                __result = modSettings.AmbientOcclusion == ON;
                 return false;
             }
         }
@@ -204,7 +220,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.Taa;
+                if (modSettings.Taa == IGNORE) return true;
+                __result = modSettings.Taa == ON;
                 return false;
             }
         }
@@ -214,7 +231,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.DepthOfField;
+                if (modSettings.DepthOfField == IGNORE) return true;
+                __result = modSettings.DepthOfField == ON;
                 return false;
             }
         }
@@ -224,7 +242,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.Fxaa;
+                if (modSettings.Fxaa == IGNORE) return true;
+                __result = modSettings.Fxaa == ON;
                 return false;
             }
         }
@@ -234,7 +253,8 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                __result = modSettings.HDR;
+                if (modSettings.HDR == IGNORE) return true;
+                __result = modSettings.HDR == ON;
                 return false;
             }
         }

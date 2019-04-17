@@ -5,59 +5,63 @@
   "DLL": "CrystalClear.dll",
   
   // default: only Grain and Dithering off
-  // recommended:  all false except ColorGrading, Taa, DepthofField, Fxaa and HDR
+  // values: 
+  //  On = mod will force this setting to be turned on
+  //  Ignore = mod will not modify this setting
+  //  Off = mod will force this setting to be turned off
+  // recommended:  all Ignore except ColorGrading, Taa, DepthofField, Fxaa and HDR
   
   "Settings": {
     // reduces clarity
-    "Grain": false,
+    "Grain": "Off",
     
     // reduces clarity
-    "Dithering": false,
+    "Dithering": "Off",
     
     // darkens the edges of the scene
-    "Vignette": true,
+    "Vignette": "Ignore",
     
     // makes light sources overblown when enabled
-    "Bloom": true,
+    "Bloom": "Ignore",
     
     // make UI elements glow
-    "UIBloom": true,
+    "UIBloom": "Ignore",
     
     // can fully disable
-    "Shadows": true,
+    "Shadows": "Ignore",
     
     // unsure if used.  it should appear as green/purple edge tinting
-    "ChromaticAberration": true,
+    "ChromaticAberration": "Ignore",
     
     // simulates pupil dilation response
-    "EyeAdaptation": true,
+    "EyeAdaptation": "Ignore",
     
-    // setting to true makes everywhere foggy
+    // setting to "Ignore" makes everywhere foggy
     "Fog": false,
     
     // unsure */
-    "ColorGrading": true,
+    "ColorGrading": "Ignore",
     
     // looks so good I wouldn't disable it
-    "AmbientOcclusion": true,
+    "AmbientOcclusion": "Ignore",
     
     // temporal antialiasing aka MFAA - good fidelity
-    "Taa": true,
+    "Taa": "Ignore",
     
     // stuff at different distances is focused differently (blurred)
-    "DepthOfField": true,
+    "DepthOfField": "Ignore",
     
     // almost-free anti-aliasing
-    "Fxaa": true,
+    "Fxaa": "Ignore",
     
     // renderer is expecting this to be on but works without
-    "HDR": true,
+    "HDR": "Ignore",
     
     // dirty UI */
-    "Grunge": true,
+    "Grunge": "Ignore",
     
     // scanline animation on UI
-    "Scanlines": true
+    "Scanlines": "Ignore"
   }
 }
 
