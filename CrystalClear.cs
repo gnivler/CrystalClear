@@ -121,6 +121,8 @@ namespace CrystalClear
                         __result = false;
                         break;
                     }
+                    default:
+                        return true;
                 }
 
                 return false;
