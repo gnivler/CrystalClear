@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("gnivler")]
 [assembly: AssemblyProduct("CrystalClear")]
-[assembly: AssemblyCopyright("MIT")]
+[assembly: AssemblyCopyright("Unlicense")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
