@@ -1,10 +1,8 @@
 ﻿using Harmony;
 using Newtonsoft.Json;
 using System;
-using System.IO;
 using System.Reflection;
 using BattleTech.Rendering;
-using BattleTech.UI.Tooltips;
 using UnityEngine;
 using UnityEngine.PostProcessing;
 using static CrystalClear.Logger;
@@ -40,7 +38,7 @@ namespace CrystalClear
 
         public static void Init(string modDirectory, string settingsJson)
         {
-            FileLog.logPath = Path.Combine(modDirectory, "log.txt");
+            //FileLog.logPath = Path.Combine(modDirectory, "log.txt");
             Clear();
             var harmony = HarmonyInstance.Create("ca.gnivler.CrystalClear");
             //HarmonyInstance.DEBUG = false;
