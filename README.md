@@ -1,10 +1,8 @@
 # CrystalClear
 Provides control over the post-processing effects in HBS's BATTLETECH game.
-The default settings remove 2 grainy effects, grain and dithering.  You can turn these back on, and/or toggle other effects.
+The default settings are vanilla - edit mod.json and set to OFF or ON as desired (case sensitive).
 
-True means they are active.  These are case-sensitive but included in the mod.json
-
-I've tested the settings to a decent degree on an NVIDIA GTX 1080 without any problems.  Fog is a weird one to enable, but knock yourself out.
+See mod.json for brief descriptions of settings
 
 Grain</br>
 Dithering</br>
