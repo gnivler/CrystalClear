@@ -38,10 +38,7 @@ namespace CrystalClear
 
         public static void Init(string modDirectory, string settingsJson)
         {
-            //FileLog.logPath = Path.Combine(modDirectory, "log.txt");
-            Clear();
             var harmony = HarmonyInstance.Create("ca.gnivler.CrystalClear");
-            //HarmonyInstance.DEBUG = false;
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             try
             {
@@ -106,7 +103,7 @@ namespace CrystalClear
         {
             public static bool Prefix(ref bool __result)
             {
-                // implicitly does nothing if 'NotSet'
+                // implicitly does nothing if 'NotSet'B
                 switch (modSettings.Dithering)
                 {
                     case "ON":
