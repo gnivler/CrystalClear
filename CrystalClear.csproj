@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CrystalClear</RootNamespace>
     <AssemblyName>CrystalClear</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -35,7 +35,7 @@
       <HintPath>C:\References\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>C:\References\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp - Copy.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>C:\References\Newtonsoft.Json.dll</HintPath>
@@ -49,10 +49,12 @@
     <Reference Include="UnityEngine">
       <HintPath>C:\References\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>C:\References\UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CrystalClear.cs" />
-    <Compile Include="Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +65,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y $(TargetPath) N:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CrystalClear</PostBuildEvent>
+    <PostBuildEvent>copy /y $(TargetPath) N:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CrystalClear
+    copy /y $(ProjectDir)mod.json N:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CrystalClear</PostBuildEvent>
   </PropertyGroup>
 </Project>

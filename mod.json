@@ -1,62 +1,29 @@
 ﻿{
   "Name": "CrystalClear",
-  "Version": "2.45",
+  "Version": "2.5.2",
   "Enabled": true,
   "DLL": "CrystalClear.dll",
-  
-  // Settings must be in caps
-  // NOTSET just leaves the game to run vanilla
-  
+
   "Settings": {
-    // reduces clarity
-    "Grain": "NOTSET",
-    
-    // reduces clarity
-    "Dithering": "NOTSET",
-    
-    // darkens the edges of the scene
-    "Vignette": "NOTSET",
-    
-    // makes light sources overblown when enabled
-    "Bloom": "NOTSET",
-    
-    // make UI elements glow
-    "UIBloom": "NOTSET",
-    
-    // can fully disable
+    "Grain": "OFF",
+    "Dithering": "OFF",
+    "Vignette": "OFF",
+    "Bloom": "OFF",
+    "UIBloom": "OFF",
+    "Grunge": "OFF",
+    "Scanlines": "OFF",
+    "DustStorms": "OFF",
+    "TurnBanner": "OFF",
+    "MotionBlur": "OFF",
     "Shadows": "NOTSET",
-    
-    // unsure if used.  it should appear as green/purple edge tinting
-    "ChromaticAberration": "NOTSET",
-    
-    // simulates pupil dilation response
-    "EyeAdaptation": "NOTSET",
-    
-    // setting to true makes everywhere foggy
-    "Fog": "NOTSET",
-    
-    // unsure
-    "ColorGrading": "NOTSET",
-    
-    // looks so good I wouldn't disable it
     "AmbientOcclusion": "NOTSET",
-    
-    // temporal antialiasing aka MFAA - good fidelity
     "Taa": "NOTSET",
-    
-    // stuff at different distances is focused differently (blurred)
     "DepthOfField": "NOTSET",
-    
-    // almost-free anti-aliasing
     "Fxaa": "NOTSET",
-    
-    // renderer is expecting this to be on but works without
     "HDR": "NOTSET",
-    
-    // dirty UI
-    "Grunge": "NOTSET",
-    
-    // scanline animation on UI
-    "Scanlines": "NOTSET",
-  },
+    "ChromaticAberration": "NOTSET",
+    "EyeAdaptation": "NOTSET",
+    "Fog": "OFF",
+    "ColorGrading": "NOTSET"
+  }
 }

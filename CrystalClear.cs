@@ -1,11 +1,17 @@
 ﻿using Harmony;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using BattleTech.Rendering;
+using BattleTech.Rendering.Mood;
+using BattleTech.UI;
+using HBS.Extensions;
 using UnityEngine;
 using UnityEngine.PostProcessing;
-using static CrystalClear.Logger;
+using UnityEngine.UI;
+
+// ReSharper disable InconsistentNaming
 
 namespace CrystalClear
 {
@@ -28,82 +34,132 @@ namespace CrystalClear
         public string HDR;
         public string Grunge;
         public string Scanlines;
-        public bool enableDebug;
+        public string MotionBlur;
+        public string TurnBanner;
+        public string DustStorms;
     }
 
     public static class CrystalClear
     {
-        public static Settings modSettings;
-        public static string modDirectory;
+        private static Settings modSettings;
 
-        public static void Init(string modDirectory, string settingsJson)
+        public static void Init(string settingsJson)
         {
-            var harmony = HarmonyInstance.Create("ca.gnivler.CrystalClear");
+            var harmony = HarmonyInstance.Create("ca.gnivler.BattleTech.CrystalClear");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             try
             {
-                CrystalClear.modDirectory = modDirectory;
                 modSettings = JsonConvert.DeserializeObject<Settings>(settingsJson);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Error(e);
+                Log(ex);
             }
 
-            int mainTex = Shader.PropertyToID("_MainTex");
-            Type uniformsType = AccessTools.Inner(typeof(BTPostProcess), "Uniforms");
+            // UI grunge
+            var mainTex = Shader.PropertyToID("_MainTex");
+            var uniformsType = AccessTools.Inner(typeof(BTPostProcess), "Uniforms");
 
             if (modSettings.Grunge == "OFF")
             {
-                LogDebug("Patching UI grunge");
+                Log("Patching UI grunge");
                 AccessTools.Field(uniformsType, "_GrungeTex").SetValue(null, mainTex);
             }
 
+            // UI scanlines
             if (modSettings.Scanlines == "OFF")
             {
-                LogDebug("Patching UI scanlines");
+                Log("Patching UI scanlines");
                 AccessTools.Field(uniformsType, "_ScanlineTex").SetValue(null, mainTex);
             }
 
+            // Grainy
             if (modSettings.Dithering == "OFF")
             {
-                LogDebug("Patching dithering");
+                Log("Patching dithering");
                 AccessTools.Field(uniformsType, "_DitheringTex").SetValue(null, 0);
             }
         }
 
+        private static void Log(object input)
+        {
+            //FileLog.Log($"[CC] {input}");
+        }
+
+        // hide turn banner overlay
+        [HarmonyPatch(typeof(TurnEventNotification), "ShowTeamNotification")]
+        public class TurnEventNotification_ShowTeamNotification_Patch
+        {
+            public static void Postfix(ref List<Graphic> ___graphicList)
+            {
+                if (modSettings.TurnBanner == "OFF")
+                {
+                    ___graphicList.Find(x => x.name == "tt_barFill").gameObject.SetActive(false);
+                }
+            }
+        }
+
+        // hide dust storms
+        [HarmonyPatch(typeof(WeatherController), "SetWeather")]
+        public static class WeatherController_SetWeather_Patch
+        {
+            public static void Postfix(WeatherController __instance)
+            {
+                if (modSettings.DustStorms != "OFF")
+                {
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(__instance.weatherSettings.weatherVFXName))
+                {
+                    try
+                    {
+                        __instance.currentWeatherVFX.FindFirstChildNamed("dustGust_world").SetActive(false);
+                        __instance.currentWeatherVFX.FindFirstChildNamed("dustGust_local").SetActive(false);
+                    }
+                    // ReSharper disable once EmptyGeneralCatchClause
+                    catch
+                    {
+                    }
+                }
+            }
+        }
+
+        // UI bloom
         [HarmonyPatch(typeof(BTPostProcess), "OnEnable", MethodType.Normal)]
-        public static class BTPostProcess_Ctor_Patch
+        public static class BTPostProcess_OnEnable_Patch
         {
             public static void Postfix(ref float ___uiBloomIntensity)
             {
                 if (modSettings.UIBloom == "OFF")
                 {
-                    LogDebug("Patching UI bloom");
+                    Log("Patching UI bloom");
                     ___uiBloomIntensity = 0f;
                 }
             }
         }
 
+        // UI bloom
         [HarmonyPatch(typeof(MenuCamera), "OnEnable", MethodType.Normal)]
-        public static class MenuCamera_Ctor_Patch
+        public static class MenuCamera_OnEnable_Patch
         {
             public static void Postfix(ref float ___uiBloomIntensity)
             {
                 if (modSettings.UIBloom == "OFF")
                 {
-                    LogDebug("Patching menu bloom");
+                    Log("Patching menu bloom");
                     ___uiBloomIntensity = 0f;
                 }
             }
         }
 
+        // Dithering
         [HarmonyPatch(typeof(DitheringComponent), "active", MethodType.Getter)]
-        public static class PatchDitheringComp
+        public static class DitheringComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
-                // implicitly does nothing if 'NotSet'B
+                // implicitly does nothing if 'NOTSET'
                 switch (modSettings.Dithering)
                 {
                     case "ON":
@@ -111,11 +167,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -124,8 +182,37 @@ namespace CrystalClear
             }
         }
 
+        // Motion blur
+        [HarmonyPatch(typeof(MotionBlurComponent), "active", MethodType.Getter)]
+        public static class MotionBlurComponent_active_Patch
+        {
+            public static bool Prefix(ref bool __result)
+            {
+                switch (modSettings.MotionBlur)
+                {
+                    case "ON":
+                    {
+                        __result = true;
+                        break;
+                    }
+
+                    case "OFF":
+                    {
+                        __result = false;
+                        break;
+                    }
+
+                    default:
+                        return true;
+                }
+
+                return false;
+            }
+        }
+
+        // Grain
         [HarmonyPatch(typeof(GrainComponent), "active", MethodType.Getter)]
-        public static class PatchGrainComp
+        public static class GrainComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -136,11 +223,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -149,8 +238,9 @@ namespace CrystalClear
             }
         }
 
+        // Vignette
         [HarmonyPatch(typeof(VignetteComponent), "active", MethodType.Getter)]
-        public static class PatchVignette
+        public static class VignetteComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -161,11 +251,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -174,8 +266,9 @@ namespace CrystalClear
             }
         }
 
+        // Bloom
         [HarmonyPatch(typeof(BloomComponent), "active", MethodType.Getter)]
-        public static class PatchBloom
+        public static class BloomComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -186,11 +279,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -199,8 +294,9 @@ namespace CrystalClear
             }
         }
 
+        // Shadows
         [HarmonyPatch(typeof(ScreenSpaceShadowsComponent), "active", MethodType.Getter)]
-        public static class PatchShadows
+        public static class ScreenSpaceShadowsComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -211,11 +307,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -224,8 +322,9 @@ namespace CrystalClear
             }
         }
 
+        // Chromatic abberation
         [HarmonyPatch(typeof(ChromaticAberrationComponent), "active", MethodType.Getter)]
-        public static class ChromaticAberration
+        public static class ChromaticAberrationComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -236,11 +335,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -249,8 +350,9 @@ namespace CrystalClear
             }
         }
 
+        // Eye adaptation
         [HarmonyPatch(typeof(EyeAdaptationComponent), "active", MethodType.Getter)]
-        public static class EyeAdaptation
+        public static class EyeAdaptationComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -261,11 +363,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -274,8 +378,9 @@ namespace CrystalClear
             }
         }
 
+        // Fog
         [HarmonyPatch(typeof(FogComponent), "active", MethodType.Getter)]
-        public static class Fog
+        public static class FogComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -286,11 +391,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -299,8 +406,9 @@ namespace CrystalClear
             }
         }
 
+        // Color grading
         [HarmonyPatch(typeof(ColorGradingComponent), "active", MethodType.Getter)]
-        public static class ColorGrading
+        public static class ColorGradingComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -311,11 +419,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -324,8 +434,9 @@ namespace CrystalClear
             }
         }
 
+        // Ambient occlusion
         [HarmonyPatch(typeof(AmbientOcclusionComponent), "active", MethodType.Getter)]
-        public static class AmbientOcclusion
+        public static class AmbientOcclusionComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -336,11 +447,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -349,8 +462,9 @@ namespace CrystalClear
             }
         }
 
+        // Temporal anti-aliasing
         [HarmonyPatch(typeof(TaaComponent), "active", MethodType.Getter)]
-        public static class Taa
+        public static class TaaComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -361,11 +475,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -374,8 +490,9 @@ namespace CrystalClear
             }
         }
 
+        // Depth of field
         [HarmonyPatch(typeof(DepthOfFieldComponent), "active", MethodType.Getter)]
-        public static class DepthOfField
+        public static class DepthOfFieldComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -386,11 +503,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -399,8 +518,9 @@ namespace CrystalClear
             }
         }
 
+        // FXAA
         [HarmonyPatch(typeof(FxaaComponent), "active", MethodType.Getter)]
-        public static class Fxaa
+        public static class FxaaComponent_active_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -411,11 +531,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
@@ -424,8 +546,9 @@ namespace CrystalClear
             }
         }
 
+        // HDR
         [HarmonyPatch(typeof(PostProcessingContext), "isHdr", MethodType.Getter)]
-        public static class HdrPatch
+        public static class PostProcessingContext_isHdr_Patch
         {
             public static bool Prefix(ref bool __result)
             {
@@ -436,11 +559,13 @@ namespace CrystalClear
                         __result = true;
                         break;
                     }
+
                     case "OFF":
                     {
                         __result = false;
                         break;
                     }
+
                     default:
                         return true;
                 }
