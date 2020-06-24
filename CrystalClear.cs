@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using BattleTech.Rendering;
 using BattleTech.Rendering.Mood;
@@ -37,6 +38,9 @@ namespace CrystalClear
         public string MotionBlur;
         public string TurnBanner;
         public string DustStorms;
+        public string Pollen;
+        public string Rain;
+        public string Mist;
     }
 
     public static class CrystalClear
@@ -45,6 +49,7 @@ namespace CrystalClear
 
         public static void Init(string settingsJson)
         {
+            Log("Startup");
             var harmony = HarmonyInstance.Create("ca.gnivler.BattleTech.CrystalClear");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             try
@@ -55,6 +60,7 @@ namespace CrystalClear
             {
                 Log(ex);
             }
+
 
             // UI grunge
             var mainTex = Shader.PropertyToID("_MainTex");
@@ -83,7 +89,7 @@ namespace CrystalClear
 
         private static void Log(object input)
         {
-            //FileLog.Log($"[CC] {input}");
+            //FileLog.Log($"[CC] {input ?? "null"}");
         }
 
         // hide turn banner overlay
@@ -105,22 +111,54 @@ namespace CrystalClear
         {
             public static void Postfix(WeatherController __instance)
             {
-                if (modSettings.DustStorms != "OFF")
+                try
                 {
-                    return;
-                }
+                    if (__instance.currentWeatherVFX == null)
+                    {
+                        return;
+                    }
 
-                if (!string.IsNullOrEmpty(__instance.weatherSettings.weatherVFXName))
+                    var transforms = __instance.currentWeatherVFX
+                        .GetComponentsInChildren<Transform>().Where(x => x != null)
+                        .Where(x => !string.IsNullOrEmpty(x.name));
+                    //transforms.Do(Log);
+
+                    if (modSettings.Rain == "OFF")
+                    {
+                        Log("Patching rain");
+                        DisableComponent("rain");
+                    }
+
+                    if (modSettings.Pollen == "OFF")
+                    {
+                        Log("Patching pollen");
+                        DisableComponent("pollen");
+                    }
+
+                    if (modSettings.Mist == "OFF")
+                    {
+                        Log("Patching mist");
+                        DisableComponent("mist");
+                    }
+
+                    if (modSettings.DustStorms == "OFF")
+                    {
+                        Log("Patching dust");
+                        DisableComponent("dust");
+                    }
+
+                    void DisableComponent(string name)
+                    {
+                        name = name.ToLower();
+                        foreach (var transform in transforms)
+                        {
+                            transform.gameObject.SetActive(false);
+                        }
+                    }
+                }
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        __instance.currentWeatherVFX.FindFirstChildNamed("dustGust_world").SetActive(false);
-                        __instance.currentWeatherVFX.FindFirstChildNamed("dustGust_local").SetActive(false);
-                    }
-                    // ReSharper disable once EmptyGeneralCatchClause
-                    catch
-                    {
-                    }
+                    Log(ex);
                 }
             }
         }

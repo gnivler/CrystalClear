@@ -1,6 +1,6 @@
 ﻿{
   "Name": "CrystalClear",
-  "Version": "2.5.2",
+  "Version": "2.6",
   "Enabled": true,
   "DLL": "CrystalClear.dll",
 
@@ -13,6 +13,9 @@
     "Grunge": "OFF",
     "Scanlines": "OFF",
     "DustStorms": "OFF",
+    "Pollen": "OFF",
+    "Rain": "NOTSET",
+    "Mist": "OFF",
     "TurnBanner": "OFF",
     "MotionBlur": "OFF",
     "Shadows": "NOTSET",
